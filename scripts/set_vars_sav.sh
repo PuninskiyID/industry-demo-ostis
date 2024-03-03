@@ -12,3 +12,14 @@ export HUTOROK_REPO="https://github.com/PuninskiyID/khutorok-ostis.git"
 export HUTOROK_BRANCH="main"
 export HUTOROK_COMMIT=""
 export HUTOROK_PATH="${APP_ROOT_PATH}/kb/hutorok"
+
+export S88_REPO="https://github.com/PuninskiyID/s88-ostis.git"
+export S88_BRANCH="master"
+export S88_COMMIT=""
+export S88_PATH="${APP_ROOT_PATH}/kb/s88"
+
+export isa51_REPO="https://github.com/Danshicu/isa-5.1-ostis.git"
+export isa51_BRANCH="master"
+export isa51_COMMIT=""
+export isa51_PATH="${APP_ROOT_PATH}/kb/isa51"
+
