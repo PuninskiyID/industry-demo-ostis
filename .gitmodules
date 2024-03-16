@@ -1,0 +1,12 @@
+[submodule "kb/s88/s88-ostis"]
+	path = kb/s88/s88-ostis
+	url = https://github.com/savushkin-r-d/s88-ostis.git
+[submodule "kb/s88-ostis"]
+	path = kb/s88-ostis
+	url = https://github.com/savushkin-r-d/s88-ostis.git
+[submodule "kb/khutorok-ostis"]
+	path = kb/khutorok-ostis
+	url = https://github.com/savushkin-r-d/khutorok-ostis.git
+[submodule "kb/isa-5.1-ostis"]
+	path = kb/isa-5.1-ostis
+	url = https://github.com/savushkin-r-d/isa-5.1-ostis.git
