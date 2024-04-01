@@ -1,0 +1,31 @@
+lib_component_ui_menu_example = [*
+ui_menu_example<- ui_user_command_class_atom; ui_user_command_class_view_kb; ui_one_argument_command_class;;
+
+ui_menu_example
+=> nrel_main_idtf: 
+	[пример ]
+	(* <- lang_ru;; *);
+=> nrel_idtf: 
+	[ппример]
+	(* <- lang_ru;; *);;
+
+ui_menu_example
+=> nrel_main_idtf: 
+	[example]
+	(* <- lang_en;; *);
+=> nrel_idtf: 
+	[example]
+	(* <- lang_en;; *);;
+
+ui_menu_example=> ui_nrel_command_template:
+	[*
+		action_example_action _-> ._question_example_instance
+			(*
+				_-> ui_arg_1;;
+			*);;
+		._question_example_instance _<- question;;
+	*];;
+
+ui_menu_example=> ui_nrel_command_lang_template: [пример $ui_arg_1?] (* <- lang_ru;; *);;
+ui_menu_example=> ui_nrel_command_lang_template: [example $ui_arg_1?] (* <- lang_en;; *);;
+*];;
