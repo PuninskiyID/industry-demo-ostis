@@ -3,9 +3,7 @@
 *.scs~
 ostis-web-platform
 *.log
-bin/
 build/
-*.bin
 .cache/
 
 __pycache__
