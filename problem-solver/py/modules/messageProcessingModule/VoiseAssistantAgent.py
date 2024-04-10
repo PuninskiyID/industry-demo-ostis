@@ -27,8 +27,13 @@ from sc_kpm.utils.action_utils import (
 )
 from sc_kpm import ScKeynodes
 
-import requests
 
+# --- agent libraries ---
+import requests
+from datetime import date, datetime
+import speech_recognition
+import pyttsx3
+import re
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s | %(name)s | %(message)s", datefmt="[%d-%b-%y %H:%M:%S]"
@@ -51,82 +56,136 @@ logging.basicConfig(
 
 class VoiseAssistantAgent(ScAgentClassic):
     def __init__(self):
-        super().__init__("voice_test_action")
-        
+        super().__init__("voice_action")
+        self.inp_node_1 = ""
+        self.inp_node_2 = ""
+    
 
 
 
     def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
         
-        result = self.run(action_element)
-        is_successful = result == ScResult.OK
+        self.logger.info("Agent is up" )
+        # --- set hardware ---
+        self.create_edge_pattern = "Построить дугу из 'identifier' в 'identifier'"
 
-    def run(self,action_element):
-        self.logger.info('*' * 20 + 'Voise assistant is up' + '*' * 20 )    
-        # Get sc-link with raw text    
+        self.recognizer = speech_recognition.Recognizer()
+        self.microphone = speech_recognition.Microphone()
+        self.assistant()
 
-        coagulator = ScKeynodes["сoagulator"]   
 
-        print(coagulator) 
-        # base_voice_node = get_action_arguments(action_element)
+
+
+        node_1 = self.inp_node_1
+        node_2 = self.inp_node_2
+        node_1 = ScKeynodes[f"{node_1}"]
+        node_2 = ScKeynodes[f"{node_2}"]
+
+        self.logger.info(f"Get node {node_1} and node  {node_2}")
         
-        # if not base_voice_node:
-        #     self.logger.error('Error: could not start voice  assistant process')
-        #     return ScResult.ERROR_INVALID_PARAMS
-        
-        #Get language of raw text sc-link
-        # language_template = ScTemplate()
-        # language_template.triple(
-        #     sc_types.NODE_CLASS,
-        #     sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        #     base_voice_node
-        # )
+        self.logger.info(" ")
+        self.logger.info("Connecting")
+        edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM,node_1,node_2)
 
-        # search_result = template_search(language_template)
-        # print(search_result)
-
-
+        self.logger.info("Finish")
         return ScResult.OK
-    #     if len(search_result) != 1:
-    #         self.logger.error('Error: You have passed no language or too many arguments.')
-    #         return ScResult.ERROR_INVALID_PARAMS
-    #     language_node = search_result[0][0]
-    #     language = get_system_idtf(language_node)
-    #     if not language in cf.AVAILABLE_LANGUAGES:
-    #         self.logger.error(f'Error: you have not passed available language as argument. You passed: {language}')
-    #         return ScResult.ERROR_INVALID_PARAMS
+
+    def say(self,reply: str):
+        engine = pyttsx3.init()
+        engine.say(reply)
+        engine.runAndWait()
+
+
+    def record_and_recognize_audio(self,*args: tuple):
+        """
+        Запись и распознавание аудио
+        """
+        with self.microphone:
+            recognized_data = ""
+
+            # регулирование уровня окружающего шума
+            self.recognizer.adjust_for_ambient_noise(self.microphone, duration=2)
+
+            try:
+                self.logger.info("Listening...")
+                audio = self.recognizer.listen(self.microphone, 5, 5)
+
+            except speech_recognition.WaitTimeoutError:
+                self.logger.info("Can you check if your microphone is on, please?")
+                return
+
+            # использование online-распознавания через Google
+            try:
+                self.logger.info("Started recognition...")
+                recognized_data = self.recognizer.recognize_google(audio, language="ru").lower()
+                
+            except speech_recognition.UnknownValueError:
+                pass
+
+            # в случае проблем с доступом в Интернет происходит выброс ошибки
+            except speech_recognition.RequestError:
+                self.logger.info("Check your Internet Connection, please")
+
+            return recognized_data
+
+
+
+    def assistant(self):
+        time_prompt = ["сколько время", "сколько времени", "время"]
+        date_prompt = ["какое сегодня число", "дата"]
+        while True:
+            voice_input = self.record_and_recognize_audio()
+            self.recognition_filter(voice_input)
+            self.say(voice_input)
+            self.logger.info(voice_input)
+            if voice_input in date_prompt:
+                current_date = date.today()
+                result = str(current_date.day) + " " + str(current_date.month) + " " + str(current_date.year)
+                self.say(result)
+            elif voice_input in time_prompt:
+                current_time = datetime.now().time()
+                result = str(current_time).split(":")[0] + " " + str(current_time).split(":")[1]
+                self.say(result)
+            elif voice_input == "стоп":  # окончание работы по команде "стоп"
+                self.say("до свидания")
+                break
+
+    def get_nodes_identifiers(self,data):
+        data_list = data.split(' ')
+        identifier_1 = []
+        identifier_2 = []
+        end_words_list = ["до", "к", "в"]
+        for end_word in end_words_list:
+            if end_word in data_list:
+                border = data_list.index(end_word)
+                break
+
+        for word in data_list[:border]:
+            if re.match(r'^[a-zA-Z]+$', word):
+                identifier_1.append(word)
+
+        for word in data_list[border:]:
+            if re.match(r'^[a-zA-Z]+$', word):
+                identifier_2.append(word)
+
+        self.logger.info(identifier_1)
+        self.logger.info(identifier_2)
+
+
+        node_1 = ScKeynodes[f"{identifier_1[0]}"]
+        node_2 = ScKeynodes[f"{identifier_2[0]}"]
+
+        self.logger.info(f"Get node {node_1} and node  {node_2}")
         
-    #     # Get raw text string
-    #     raw_text = get_link_content_data(base_voice_node)        
-    #     if not isinstance(raw_text, str):
-    #         self.logger.error(f'Error: your raw text link must be string type, but text of yours is {type(raw_text)}')
-    #         return ScResult.ERROR_INVALID_TYPE
+        self.logger.info(" ")
+        self.logger.info("Connecting")
+        edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM,node_1,node_2)
 
-    #     # Trying to get clean text        
-    #     try:
-    #         clean_text = self._get_clean_text(raw_text, language)            
-    #     except Exception as err:
-    #         self.logger.error(f'Error: {err}.\nThis error is on local LLM\'s side.')
-    #         return ScResult.ERROR
-        
-    #     # Check text for emptiness. If processed text is empty, that means that model does not work
-    #     if clean_text is None or clean_text == '':
-    #         self.logger.error(f'Error: local LLM does not work. Try to change it or use other processing method.')
-    #         return ScResult.ERROR
+        self.logger.info("Finish")
 
-    #     # Creating answer and finishing agent work
-    #     answer_link = create_link(clean_text, ScLinkContentType.STRING)        
-    #     create_action_answer(action_element, answer_link)
-    #     self.logger.info('Successfully processed the text using local LLM.')
-    #     finish_action_with_status(action_element, True)
-    #     return ScResult.OK
+       
 
-    # def run(self, action_node: ScAddr) -> ScResult:
-    #     self.logger.info("ExampleAgent started")
 
-    #     link = create_link(
-    #         "smth", ScLinkContentType.STRING, link_type=sc_types.LINK_CONST)
- 
-    #     create_action_answer(action_node, link)
-
-    #     return ScResult.OK
+    def recognition_filter(self,data: str):
+        if "построить дугу" in data:
+            self.get_nodes_identifiers(data)
