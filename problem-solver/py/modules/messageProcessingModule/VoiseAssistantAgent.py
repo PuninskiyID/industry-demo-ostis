@@ -120,7 +120,7 @@ class VoiseAssistantAgent(ScAgentClassic):
         
         self.logger.info(" ")
         self.logger.info("Deleting ...")
-        delete_edges(node_1,node_2,sc_types.EDGE_ACCESS_CONST_POS_PERM)
+        delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_CONST_POS_PERM)
 
         self.logger.info("Finish")    
 
@@ -206,27 +206,32 @@ class VoiseAssistantAgent(ScAgentClassic):
         identifier_1 = []
         identifier_2 = []
         end_words_list = ["до", "к", "в"]
+        border = 0
         for end_word in end_words_list:
             if end_word in data_list:
                 border = data_list.index(end_word)
                 break
+        
 
-        for word in data_list[:border]:
-            if re.match(r'^[a-zA-Z]+$', word):
-                identifier_1.append(word)
+        if border:
+            for word in data_list[:border]:
+                if re.match(r'^[a-zA-Z]+$', word):
+                    identifier_1.append(word)
 
-        for word in data_list[border:]:
-            if re.match(r'^[a-zA-Z]+$', word):
-                identifier_2.append(word)
+            for word in data_list[border:]:
+                if re.match(r'^[a-zA-Z]+$', word):
+                    identifier_2.append(word)
 
-        self.logger.info(identifier_1)
-        self.logger.info(identifier_2)
+            self.logger.info(identifier_1)
+            self.logger.info(identifier_2)
 
 
-        if edge_flag == True:
-            self.build_edge(identifier_1,identifier_2)
-        elif edge_flag == False:
-            self.delete_edge(identifier_1,identifier_2)    
+            if edge_flag == True:
+                self.build_edge(identifier_1,identifier_2)
+            elif edge_flag == False:
+                self.delete_edge(identifier_1,identifier_2)    
+        else:
+            self.say("Запроос не соотвествует шаблону")        
     
 
 
