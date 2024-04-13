@@ -1,12 +1,12 @@
 """
-This code creates some test agent and registers until the user stops the process.
-For this we wait for SIGINT.
+Voice command agent code
 """
 import logging
 from sc_client.models import ScAddr, ScLinkContentType, ScTemplate
 from sc_client.constants import sc_types
+from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_client.client import template_search
-
+from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 from sc_kpm import ScAgentClassic, ScModule, ScResult, ScServer
 from sc_kpm.sc_sets import ScSet
 from sc_kpm.utils import (
@@ -76,18 +76,18 @@ class VoiseAssistantAgent(ScAgentClassic):
 
 
 
-        node_1 = self.inp_node_1
-        node_2 = self.inp_node_2
-        node_1 = ScKeynodes[f"{node_1}"]
-        node_2 = ScKeynodes[f"{node_2}"]
+        # node_1 = self.inp_node_1
+        # node_2 = self.inp_node_2
+        # node_1 = ScKeynodes[f"{node_1}"]
+        # node_2 = ScKeynodes[f"{node_2}"]
 
-        self.logger.info(f"Get node {node_1} and node  {node_2}")
+        # self.logger.info(f"Get node {node_1} and node  {node_2}")
         
-        self.logger.info(" ")
-        self.logger.info("Connecting")
-        edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM,node_1,node_2)
+        # self.logger.info(" ")
+        # self.logger.info("Connecting")
+        # edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM,node_1,node_2)
 
-        self.logger.info("Finish")
+        # self.logger.info("Finish")
         return ScResult.OK
 
     def say(self,reply: str):
@@ -95,6 +95,53 @@ class VoiseAssistantAgent(ScAgentClassic):
         engine.say(reply)
         engine.runAndWait()
 
+
+    # --- Set of functions for ScAddr interaction
+
+
+    def build_edge(self,identifier_1,identifier_2):
+        node_1 = ScKeynodes[f"{identifier_1[0]}"]
+        node_2 = ScKeynodes[f"{identifier_2[0]}"]
+
+        self.logger.info(f"Get node {node_1} and node  {node_2}")
+        
+        self.logger.info(" ")
+        self.logger.info("Connecting ...")
+        edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM,node_1,node_2)
+
+        self.logger.info("Finish")
+
+
+    def delete_edge(self,identifier_1,identifier_2):
+        node_1 = ScKeynodes[f"{identifier_1[0]}"]
+        node_2 = ScKeynodes[f"{identifier_2[0]}"]
+
+        self.logger.info(f"Get node {node_1} and node  {node_2}")
+        
+        self.logger.info(" ")
+        self.logger.info("Deleting ...")
+        delete_edges(node_1,node_2,sc_types.EDGE_ACCESS_CONST_POS_PERM)
+
+        self.logger.info("Finish")    
+
+    def call_agent(self,identifier_1):
+        node_1 = ScKeynodes[f"{identifier_1[0]}"]
+
+        self.logger.info(f"Get node {node_1}")
+        self.logger.info(" ")
+        self.logger.info("Call system agent")
+
+
+        
+
+        kwargs = dict(
+            arguments={node_1: False},
+            concepts=[CommonIdentifiers.QUESTION, "question_search_full_semantic_neighborhood"],
+        )
+
+        question = call_agent(**kwargs)
+
+        
 
     def record_and_recognize_audio(self,*args: tuple):
         """
@@ -135,9 +182,10 @@ class VoiseAssistantAgent(ScAgentClassic):
         date_prompt = ["какое сегодня число", "дата"]
         while True:
             voice_input = self.record_and_recognize_audio()
+            self.logger.info(voice_input)
             self.recognition_filter(voice_input)
             self.say(voice_input)
-            self.logger.info(voice_input)
+            
             if voice_input in date_prompt:
                 current_date = date.today()
                 result = str(current_date.day) + " " + str(current_date.month) + " " + str(current_date.year)
@@ -150,7 +198,10 @@ class VoiseAssistantAgent(ScAgentClassic):
                 self.say("до свидания")
                 break
 
-    def get_nodes_identifiers(self,data):
+
+
+    
+    def get_nodes_create_identifiers(self,data,edge_flag):
         data_list = data.split(' ')
         identifier_1 = []
         identifier_2 = []
@@ -172,20 +223,30 @@ class VoiseAssistantAgent(ScAgentClassic):
         self.logger.info(identifier_2)
 
 
-        node_1 = ScKeynodes[f"{identifier_1[0]}"]
-        node_2 = ScKeynodes[f"{identifier_2[0]}"]
+        if edge_flag == True:
+            self.build_edge(identifier_1,identifier_2)
+        elif edge_flag == False:
+            self.delete_edge(identifier_1,identifier_2)    
+    
 
-        self.logger.info(f"Get node {node_1} and node  {node_2}")
-        
-        self.logger.info(" ")
-        self.logger.info("Connecting")
-        edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM,node_1,node_2)
 
-        self.logger.info("Finish")
+    def get_node_agent_create_identifiers(self,data):
+        data_list = data.split(' ')
+        identifier_1 = []
 
-       
+        for word in data_list[2:]:
+            if re.match(r'^[a-zA-Z]+$', word):
+                identifier_1.append(word)
 
+        self.logger.info(identifier_1)   
+        self.logger.info("Calling agent ...")
+        self.call_agent(identifier_1)     
 
     def recognition_filter(self,data: str):
         if "построить дугу" in data:
-            self.get_nodes_identifiers(data)
+            self.get_nodes_create_identifiers(data,True)
+        elif "удалить дугу" in data:
+            self.get_nodes_create_identifiers(data,False) 
+        elif "что такое" in data:
+            self.get_node_agent_create_identifiers(data)
+                  
