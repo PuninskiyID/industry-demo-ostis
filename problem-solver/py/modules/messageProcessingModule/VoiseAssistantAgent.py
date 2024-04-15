@@ -133,7 +133,8 @@ class VoiseAssistantAgent(ScAgentClassic):
         node_1 = ScKeynodes[f"{identifier_1[0]}"]
 
 
-        msg = create_link(f"{identifier_1[0]} налимонивал смрадлику и его тухлым друзьям Игорюше и Данюше")
+        msg = create_link(f"{identifier_1[0]} is test sc link for check agent")
+        self.logger.info(f"{msg}")
         # relation_node = ScKeynodes["ground"]
         self.logger.info(f"Get node {node_1}")
         # self.logger.info(f"Ground address {relation_node}")
@@ -159,16 +160,21 @@ class VoiseAssistantAgent(ScAgentClassic):
 
         template_2.triple(
             msg,
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            gen_result[1]
+            sc_types.EDGE_ACCESS_VAR_POS_TEMP,
+            (sc_types.NODE_VAR, '_ex_node')
         )
 
-        gen_2_params = (sc_types.NODE_VAR, '_link_node')
-        gen_2_result = template_generate(template_2, gen_params)
-
-        self.logger.info(f"{gen_2_result[0]} ")
-        self.logger.info(f"{gen_2_result[1]} ")
-        self.logger.info(f"{gen_2_result[2]} ")
+        gen_2_params = {'_ex_node': f'{gen_result[0]}'}
+        gen_2_result = template_generate(template_2, gen_2_params)
+        self.logger.info(f"{len(gen_2_result)} is length of 2nd template")
+        self.logger.info(f"{len(gen_result)} is length of 1st template")
+        
+        if len(gen_2_result) < 3:
+            pass
+        else:
+            self.logger.info(f"{gen_2_result[0]} ")
+            self.logger.info(f"{gen_2_result[1]} ")
+            self.logger.info(f"{gen_2_result[2]} ")
 
 
         self.logger.info("Finish")
@@ -204,7 +210,7 @@ class VoiseAssistantAgent(ScAgentClassic):
             self.recognizer.adjust_for_ambient_noise(self.microphone, duration=2)
 
             try:
-                self.say("Начало записи")
+                self.say("Начало")
                 self.logger.info("Listening...")
                 
                 audio = self.recognizer.listen(self.microphone, 5, 5)
@@ -283,7 +289,7 @@ class VoiseAssistantAgent(ScAgentClassic):
             elif edge_flag == False:
                 self.delete_edge(identifier_1,identifier_2)    
         else:
-            self.say("Запроос не соотвествует шаблону")        
+            self.say("Запрос не соотвествует шаблону")        
     
 
 
