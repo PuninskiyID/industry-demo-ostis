@@ -1,0 +1,11 @@
+nrel_similar_standard
+<- sc_node_norole_relation;
+=> nrel_main_idtf:
+	[схожий стандарт*]
+	(* <- lang_ru;; *);
+	[similar standard*]
+	(* <- lang_en;; *);;
+	
+section_isa88
+=> nrel_similar_standard:
+	section_subject_domain_of_isa5_1;;
