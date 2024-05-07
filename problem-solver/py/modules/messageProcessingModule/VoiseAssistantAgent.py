@@ -322,7 +322,7 @@ class VoiseAssistantAgent(ScAgentClassic):
 
                  
 
-            self.say("Запрос не соотвествует шаблону")        
+            self.say("Invalid pattern")        
 
     
 
