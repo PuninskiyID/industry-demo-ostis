@@ -9,7 +9,7 @@ from sc_client.client import template_search
 from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 from sc_kpm import ScAgentClassic, ScModule, ScResult, ScServer
 from sc_kpm.sc_sets import ScSet
-from sc_client.client import template_generate
+from sc_client.client import template_generate , delete_elements
 from sc_kpm.utils.action_utils import add_action_arguments, call_action, create_action, execute_action, wait_agent
 from sc_kpm.utils import (
     create_link,
@@ -19,7 +19,8 @@ from sc_kpm.utils import (
     get_element_by_role_relation,
     get_element_by_norole_relation,
     get_system_idtf,
-    get_edge
+    get_edge,
+    get_edges
 )
 from sc_kpm.utils.action_utils import (
     create_action_answer,
@@ -28,7 +29,7 @@ from sc_kpm.utils.action_utils import (
     get_element_by_role_relation
 )
 from sc_kpm import ScKeynodes
-
+from sc_kpm.sc_sets import ScStructure
 
 # --- agent libraries ---
 import requests
@@ -114,6 +115,7 @@ class VoiseAssistantAgent(ScAgentClassic):
 
 
     def delete_edge(self,identifier_1,identifier_2):
+        edge_list = []
         node_1 = ScKeynodes[f"{identifier_1[0]}"]
         node_2 = ScKeynodes[f"{identifier_2[0]}"]
 
@@ -121,8 +123,12 @@ class VoiseAssistantAgent(ScAgentClassic):
         
         self.logger.info(" ")
         self.logger.info("Deleting ...")
-        delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
-
+        # status_code = delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        target_edges = get_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        self.logger.info(f"Addresses between nodes {target_edges}")
+        addrs = ScAddr(607796)
+        status_code = delete_elements(*target_edges)
+        self.logger.info(f"Delete status code {status_code}")
         self.logger.info("Finish")    
 
 
@@ -133,7 +139,7 @@ class VoiseAssistantAgent(ScAgentClassic):
         node_1 = ScKeynodes[f"{identifier_1[0]}"]
 
 
-        msg = create_link(f"{identifier_1[0]} налимонивал смрадлику и его тухлым друзьям Игорюше и Данюше")
+        msg = create_link(f"{identifier_1[0]} is test sc link,created by voice agent")
         # relation_node = ScKeynodes["ground"]
         self.logger.info(f"Get node {node_1}")
         # self.logger.info(f"Ground address {relation_node}")
@@ -174,19 +180,40 @@ class VoiseAssistantAgent(ScAgentClassic):
         self.logger.info("Finish")
 
 
-    def call_agent(self,identifier_1):
-        node_1 = ScKeynodes[f"{identifier_1[0]}"]
+    def call_agent(self):
+        node_1 = ScKeynodes["year"]
 
-        self.logger.info(f"Get node {node_1}")
+        # self.logger.info(f"Get node {node_1}")
         self.logger.info(" ")
-        self.logger.info("Call system agent")
-        action_node = create_action(CommonIdentifiers.QUESTION, "question_search_full_semantic_neighborhood")
+        self.logger.info("Call sub agent")
+        action_node = create_action(CommonIdentifiers.QUESTION, "check_node_action")
 
-        self.logger.info(type(node_1))
+        # action_node = create_action(CommonIdentifiers.QUESTION, "question_search_full_semantic_neighborhood")
+        # action_node = create_action(CommonIdentifiers.QUESTION, "action_example_action")
+
+        # self.logger.info(type(node_1))
         # node_1 = str(node_1)
-        arguments = {node_1: False}
+        arguments = {node_1: True}
         add_action_arguments(action_node, arguments)
         call_action(action_node)
+        self.logger.info("Finish")
+
+
+
+    def call_node(self,identifier_1):
+        identifier_1 = str(identifier_1[0])
+        self.logger.info(" ")
+        self.logger.info("Call node create call")
+        node_1 = ScKeynodes.resolve(f"{identifier_1}",sc_types.NODE_CONST_CLASS)
+        self.logger.info(f"Create node {identifier_1}, address {node_1} ")
+        self.logger.info("Finish")
+    
+    def delete_node(self,identifier_1):
+        identifier_1 = str(identifier_1[0])
+        self.logger.info(" ")
+        self.logger.info("Call node delete call")
+        node_1 = ScKeynodes.delete(f"{identifier_1}")
+        self.logger.info(f"Delete node {identifier_1}, status {node_1}")
         self.logger.info("Finish")
 
         
@@ -283,7 +310,7 @@ class VoiseAssistantAgent(ScAgentClassic):
             elif edge_flag == False:
                 self.delete_edge(identifier_1,identifier_2)    
         else:
-            self.say("Запроос не соотвествует шаблону")        
+            self.say("Invalid pattern")        
     
 
 
@@ -296,29 +323,69 @@ class VoiseAssistantAgent(ScAgentClassic):
                 identifier_1.append(word)
 
         self.logger.info(identifier_1)   
+
         self.logger.info("Calling agent ...")
-        self.call_agent(identifier_1)    
+
+        self.call_agent()    
+
+        
 
 
-    def get_template_identifiers(self,data):
+    def get_node_add_create_identifiers(self,data):
         data_list = data.split(' ')
         identifier_1 = []
 
-        for word in data_list[2:]:
+        for word in data_list:
             if re.match(r'^[a-zA-Z]+$', word):
                 identifier_1.append(word)
 
         self.logger.info(identifier_1)   
-        self.logger.info("Calling template generator ...")
-        self.call_template(identifier_1)      
+
+        self.logger.info("Calling node create function ...")
+
+        self.call_node(identifier_1)   
+
+    def get_node_delete_identifiers(self,data):
+        data_list = data.split(' ')
+        identifier_1 = []
+
+        for word in data_list:
+            if re.match(r'^[a-zA-Z]+$', word):
+                identifier_1.append(word)
+
+        self.logger.info(identifier_1)   
+
+        self.logger.info("Calling node delete function ...")
+
+        self.delete_node(identifier_1)    
+
+
+
+    def get_template_identifiers(self,data):
+        # data_list = data.split(' ')
+        # identifier_1 = []
+
+        # for word in data_list[2:]:
+        #     if re.match(r'^[a-zA-Z]+$', word):
+        #         identifier_1.append(word)
+
+        # self.logger.info(identifier_1)   
+        # self.logger.info("Calling template generator ...")
+        self.call_template()      
 
     def recognition_filter(self,data: str):
         if "построить дугу" in data:
             self.get_nodes_create_identifiers(data,True)
         elif "удалить дугу" in data:
             self.get_nodes_create_identifiers(data,False) 
-        elif "что такое" in data:
+
+        elif "шаблон агента" in data:
             self.get_node_agent_create_identifiers(data)
         elif "шаблон генерации" in data:
             self.get_template_identifiers(data)
+
+        elif "создать вершину" in data:
+            self.get_node_add_create_identifiers(data)
+        elif "удалить вершину" in data:
+            self.get_node_delete_identifiers(data)
                   
