@@ -9,7 +9,7 @@ from sc_client.client import template_search
 from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 from sc_kpm import ScAgentClassic, ScModule, ScResult, ScServer
 from sc_kpm.sc_sets import ScSet
-from sc_client.client import template_generate
+from sc_client.client import template_generate , delete_elements
 from sc_kpm.utils.action_utils import add_action_arguments, call_action, create_action, execute_action, wait_agent
 from sc_kpm.utils import (
     create_link,
@@ -19,7 +19,8 @@ from sc_kpm.utils import (
     get_element_by_role_relation,
     get_element_by_norole_relation,
     get_system_idtf,
-    get_edge
+    get_edge,
+    get_edges
 )
 from sc_kpm.utils.action_utils import (
     create_action_answer,
@@ -104,12 +105,21 @@ class CheckNodeAgent(ScAgentClassic):
         # --Создаем дугу
         edge = create_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM,node_1,node_2)
         # --Удаляем дугу
+        target_edges = get_edges(node_1,node_2, sc_types.UNKNOWN)
+        target_edges_2 = get_edges(node_2,node_1, sc_types.UNKNOWN)
+
+        self.logger.info(f"Addresses of all edges : {target_edges}")
+        self.logger.info(f"Addresses of all edges : {target_edges_2}")
         status_code = delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        status_code_2 = delete_elements(*target_edges)
+        status_code_3 = delete_elements(*target_edges_2)
         self.logger.info(" ")
         self.logger.info("Deleting ...")
         
         
-        self.logger.info(f"Delete status code {status_code}")
+        self.logger.info(f"Delete status code delete_edges : {status_code}")
+        self.logger.info(f"Delete status code delete_elements : {status_code_2}")
+        self.logger.info(f"Delete status code delete_elements : {status_code_3}")
         self.logger.info("Finish")   
 
         return ScResult.OK

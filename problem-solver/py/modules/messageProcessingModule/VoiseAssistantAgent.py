@@ -124,9 +124,11 @@ class VoiseAssistantAgent(ScAgentClassic):
         self.logger.info(" ")
         self.logger.info("Deleting ...")
         # status_code = delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
-        target_edges = get_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        
+        target_edges = get_edges(node_1,node_2, sc_types.UNKNOWN)
+
         self.logger.info(f"Addresses between nodes {target_edges}")
-        addrs = ScAddr(607796)
+        
         status_code = delete_elements(*target_edges)
         self.logger.info(f"Delete status code {status_code}")
         self.logger.info("Finish")    
@@ -190,21 +192,26 @@ class VoiseAssistantAgent(ScAgentClassic):
 
 
     def call_agent(self):
-        node_1 = ScKeynodes["year"]
+        # node_1 = ScKeynodes["year"]
+        node_1 = create_link(1234567,ScLinkContentType.INT)
 
-        # self.logger.info(f"Get node {node_1}")
+        self.logger.info(f"Get node {node_1}")
         self.logger.info(" ")
         self.logger.info("Call sub agent")
-        action_node = create_action(CommonIdentifiers.QUESTION, "check_node_action")
+        
+        # action_node = create_action(CommonIdentifiers.QUESTION, "check_node_action")
 
         # action_node = create_action(CommonIdentifiers.QUESTION, "question_search_full_semantic_neighborhood")
-        # action_node = create_action(CommonIdentifiers.QUESTION, "action_example_action")
+        action_node = create_action(CommonIdentifiers.QUESTION, "action_example_action")
 
-        # self.logger.info(type(node_1))
+        # self.logger.info(node_1)
         # node_1 = str(node_1)
-        arguments = {node_1: True}
+        arguments = {node_1: False}
         add_action_arguments(action_node, arguments)
         call_action(action_node)
+        wait_agent(3, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+        # or
+        is_successful = execute_action(action_node, wait_time=3)  # bool
         self.logger.info("Finish")
 
 
