@@ -50,7 +50,9 @@ class CheckNodeAgent(ScAgentClassic):
         self.logger.info("Check Agent is up" )
         # --- set hardware ---
         self.create_edge_pattern = "Построить дугу из 'identifier' в 'identifier'"
-
+        self.call_agent()
+        self.delete_edge(["some_class_name"],["some_class_name"])
+    def check_nodes(self):
         node_check_list = ["day","note","delivery","manager","call","e-mail","filling","justification","year","temperature","engineering","knowledge","left","leaving","quantifier"]
 
         for node in node_check_list:
@@ -61,9 +63,48 @@ class CheckNodeAgent(ScAgentClassic):
                 self.logger.info(f"Get node {node},his address is {node_temp_addr} ")
             except:
                 print(Exception)
+        self.logger.info(" ")
+        self.logger.info("Finish")
+        
+
+    def call_agent(self):
+        node_1 = create_link(1234567,ScLinkContentType.INT)
+
+        self.logger.info(f"Get node {node_1}")
+        self.logger.info(" ")
+        self.logger.info("Call sub agent")
+        
+        action_node = create_action(CommonIdentifiers.QUESTION, "action_example_action")
+        arguments = {node_1: False}
+
+        add_action_arguments(action_node, arguments)
+        call_action(action_node)
+
+        wait_agent(3, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+        is_successful = execute_action(action_node, wait_time=3)  
+       
 
         self.logger.info(" ")
         self.logger.info("Finish")
+
+
+    def delete_edge(self,identifier_1,identifier_2):
+        edge_list = []
+        # node_1 = ScKeynodes[f"{identifier_1[0]}"]
+        # node_2 = ScKeynodes[f"{identifier_2[0]}"]
+
+        node_1 = ScKeynodes["day"]
+        node_2 = ScKeynodes["note"]
+
+        self.logger.info(f"Get node {node_1} and node  {node_2}")
+        
+        self.logger.info(" ")
+        self.logger.info("Deleting ...")
+        status_code = delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        
+        self.logger.info(f"Delete status code {status_code}")
+        self.logger.info("Finish")   
+
         return ScResult.OK
 
     
