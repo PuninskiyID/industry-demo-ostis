@@ -98,140 +98,7 @@ class VoiseAssistantAgent(ScAgentClassic):
         engine.runAndWait()
 
 
-    # --- Set of functions for ScAddr interaction
-
-
-    def build_edge(self,identifier_1,identifier_2):
-        node_1 = ScKeynodes[f"{identifier_1[0]}"]
-        node_2 = ScKeynodes[f"{identifier_2[0]}"]
-
-        self.logger.info(f"Get node {node_1} and node  {node_2}")
-        
-        self.logger.info(" ")
-        self.logger.info("Connecting ...")
-        edge = create_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM,node_1,node_2)
-
-        self.logger.info("Finish")
-
-
-    def delete_edge(self,identifier_1,identifier_2):
-        edge_list = []
-        node_1 = ScKeynodes[f"{identifier_1[0]}"]
-        node_2 = ScKeynodes[f"{identifier_2[0]}"]
-
-        self.logger.info(f"Get node {node_1} and node  {node_2}")
-        
-        self.logger.info(" ")
-        self.logger.info("Deleting ...")
-        # status_code = delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
-        
-        target_edges = get_edges(node_1,node_2, sc_types.UNKNOWN)
-
-        self.logger.info(f"Addresses between nodes {target_edges}")
-        
-        status_code = delete_elements(*target_edges)
-        self.logger.info(f"Delete status code {status_code}")
-        self.logger.info("Finish")    
-
-
-
-
-    def call_template(self,identifier_1):
-        
-        node_1 = ScKeynodes[f"{identifier_1[0]}"]
-
-
-
-        msg = create_link(f"{identifier_1[0]} is test sc link,created by voice agent")
-        msg = create_link(f"{identifier_1[0]} is test sc link for check agent")
-        self.logger.info(f"{msg}")
-
-        # relation_node = ScKeynodes["ground"]
-        self.logger.info(f"Get node {node_1}")
-        # self.logger.info(f"Ground address {relation_node}")
-
-        template = ScTemplate()
-
-        template.triple(
-            node_1,
-            sc_types.EDGE_ACCESS_VAR_POS_TEMP,
-            (sc_types.NODE_VAR, '_var_node')
-        )
-        
-
-
-        gen_params = {'_var_node': 'day'}
-        gen_result = template_generate(template, gen_params)
-        
-        idtf_1 = get_system_idtf(gen_result[0])
-        idtf_2 = get_system_idtf(gen_result[1])
-        idtf_3 = get_system_idtf(gen_result[2])
-        
-        template_2 = ScTemplate()
-
-        template_2.triple(
-            msg,
-            sc_types.EDGE_ACCESS_VAR_POS_TEMP,
-            (sc_types.NODE_VAR, '_ex_node')
-        )
-
-        gen_2_params = {'_ex_node': f'{gen_result[0]}'}
-        gen_2_result = template_generate(template_2, gen_2_params)
-        self.logger.info(f"{len(gen_2_result)} is length of 2nd template")
-        self.logger.info(f"{len(gen_result)} is length of 1st template")
-        
-        if len(gen_2_result) < 3:
-            pass
-        else:
-            self.logger.info(f"{gen_2_result[0]} ")
-            self.logger.info(f"{gen_2_result[1]} ")
-            self.logger.info(f"{gen_2_result[2]} ")
-
-
-        self.logger.info("Finish")
-
-
-    def call_agent(self):
-        # node_1 = ScKeynodes["year"]
-        node_1 = create_link(1234567,ScLinkContentType.INT)
-
-        self.logger.info(f"Get node {node_1}")
-        self.logger.info(" ")
-        self.logger.info("Call sub agent")
-        
-        # action_node = create_action(CommonIdentifiers.QUESTION, "check_node_action")
-
-        # action_node = create_action(CommonIdentifiers.QUESTION, "question_search_full_semantic_neighborhood")
-        action_node = create_action(CommonIdentifiers.QUESTION, "action_example_action")
-
-        # self.logger.info(node_1)
-        # node_1 = str(node_1)
-        arguments = {node_1: False}
-        add_action_arguments(action_node, arguments)
-        call_action(action_node)
-        wait_agent(3, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
-        # or
-        is_successful = execute_action(action_node, wait_time=3)  # bool
-        self.logger.info("Finish")
-
-
-
-    def call_node(self,identifier_1):
-        identifier_1 = str(identifier_1[0])
-        self.logger.info(" ")
-        self.logger.info("Call node create call")
-        node_1 = ScKeynodes.resolve(f"{identifier_1}",sc_types.NODE_CONST_CLASS)
-        self.logger.info(f"Create node {identifier_1}, address {node_1} ")
-        self.logger.info("Finish")
-    
-    def delete_node(self,identifier_1):
-        identifier_1 = str(identifier_1[0])
-        self.logger.info(" ")
-        self.logger.info("Call node delete call")
-        node_1 = ScKeynodes.delete(f"{identifier_1}")
-        self.logger.info(f"Delete node {identifier_1}, status {node_1}")
-        self.logger.info("Finish")
-
+   
         
 
         
@@ -392,6 +259,140 @@ class VoiseAssistantAgent(ScAgentClassic):
         # self.logger.info(identifier_1)   
         # self.logger.info("Calling template generator ...")
         self.call_template()      
+
+     # --- Set of functions for ScAddr interaction
+
+
+    def build_edge(self,identifier_1,identifier_2):
+        node_1 = ScKeynodes[f"{identifier_1[0]}"]
+        node_2 = ScKeynodes[f"{identifier_2[0]}"]
+
+        self.logger.info(f"Get node {node_1} and node  {node_2}")
+        
+        self.logger.info(" ")
+        self.logger.info("Connecting ...")
+        edge = create_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM,node_1,node_2)
+
+        self.logger.info("Finish")
+
+
+    def delete_edge(self,identifier_1,identifier_2):
+        edge_list = []
+        node_1 = ScKeynodes[f"{identifier_1[0]}"]
+        node_2 = ScKeynodes[f"{identifier_2[0]}"]
+
+        self.logger.info(f"Get node {node_1} and node  {node_2}")
+        
+        self.logger.info(" ")
+        self.logger.info("Deleting ...")
+        # status_code = delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        
+        target_edges = get_edges(node_1,node_2, sc_types.UNKNOWN)
+
+        self.logger.info(f"Addresses between nodes {target_edges}")
+        
+        status_code = delete_elements(*target_edges)
+        self.logger.info(f"Delete status code {status_code}")
+        self.logger.info("Finish")    
+
+
+
+
+    def call_template(self,identifier_1):
+        
+        node_1 = ScKeynodes[f"{identifier_1[0]}"]
+
+
+
+        msg = create_link(f"{identifier_1[0]} is test sc link,created by voice agent")
+        msg = create_link(f"{identifier_1[0]} is test sc link for check agent")
+        self.logger.info(f"{msg}")
+
+        # relation_node = ScKeynodes["ground"]
+        self.logger.info(f"Get node {node_1}")
+        # self.logger.info(f"Ground address {relation_node}")
+
+        template = ScTemplate()
+
+        template.triple(
+            node_1,
+            sc_types.EDGE_ACCESS_VAR_POS_TEMP,
+            (sc_types.NODE_VAR, '_var_node')
+        )
+        
+
+
+        gen_params = {'_var_node': 'day'}
+        gen_result = template_generate(template, gen_params)
+        
+        idtf_1 = get_system_idtf(gen_result[0])
+        idtf_2 = get_system_idtf(gen_result[1])
+        idtf_3 = get_system_idtf(gen_result[2])
+        
+        template_2 = ScTemplate()
+
+        template_2.triple(
+            msg,
+            sc_types.EDGE_ACCESS_VAR_POS_TEMP,
+            (sc_types.NODE_VAR, '_ex_node')
+        )
+
+        gen_2_params = {'_ex_node': f'{gen_result[0]}'}
+        gen_2_result = template_generate(template_2, gen_2_params)
+        self.logger.info(f"{len(gen_2_result)} is length of 2nd template")
+        self.logger.info(f"{len(gen_result)} is length of 1st template")
+        
+        if len(gen_2_result) < 3:
+            pass
+        else:
+            self.logger.info(f"{gen_2_result[0]} ")
+            self.logger.info(f"{gen_2_result[1]} ")
+            self.logger.info(f"{gen_2_result[2]} ")
+
+
+        self.logger.info("Finish")
+
+
+    def call_agent(self):
+        # node_1 = ScKeynodes["year"]
+        node_1 = create_link(1234567,ScLinkContentType.INT)
+
+        self.logger.info(f"Get node {node_1}")
+        self.logger.info(" ")
+        self.logger.info("Call sub agent")
+        
+        # action_node = create_action(CommonIdentifiers.QUESTION, "check_node_action")
+
+        # action_node = create_action(CommonIdentifiers.QUESTION, "question_search_full_semantic_neighborhood")
+        action_node = create_action(CommonIdentifiers.QUESTION, "action_example_action")
+
+        # self.logger.info(node_1)
+        # node_1 = str(node_1)
+        arguments = {node_1: False}
+        add_action_arguments(action_node, arguments)
+        call_action(action_node)
+        wait_agent(3, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+        # or
+        is_successful = execute_action(action_node, wait_time=3)  # bool
+        self.logger.info("Finish")
+
+
+
+    def call_node(self,identifier_1):
+        identifier_1 = str(identifier_1[0])
+        self.logger.info(" ")
+        self.logger.info("Call node create call")
+        node_1 = ScKeynodes.resolve(f"{identifier_1}",sc_types.NODE_CONST_CLASS)
+        self.logger.info(f"Create node {identifier_1}, address {node_1} ")
+        self.logger.info("Finish")
+    
+    def delete_node(self,identifier_1):
+        identifier_1 = str(identifier_1[0])
+        self.logger.info(" ")
+        self.logger.info("Call node delete call")
+        node_1 = ScKeynodes.delete(f"{identifier_1}")
+        self.logger.info(f"Delete node {identifier_1}, status {node_1}")
+        self.logger.info("Finish")
 
     def recognition_filter(self,data: str):
         if "построить дугу" in data:
