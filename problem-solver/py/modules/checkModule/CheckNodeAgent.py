@@ -51,7 +51,11 @@ class CheckNodeAgent(ScAgentClassic):
         # --- set hardware ---
         self.create_edge_pattern = "Построить дугу из 'identifier' в 'identifier'"
         self.call_agent()
-        self.delete_edge(["some_class_name"],["some_class_name"])
+        self.build_delete_edge(["some_class_name"],["some_class_name"])
+
+
+
+        
     def check_nodes(self):
         node_check_list = ["day","note","delivery","manager","call","e-mail","filling","justification","year","temperature","engineering","knowledge","left","leaving","quantifier"]
 
@@ -88,7 +92,7 @@ class CheckNodeAgent(ScAgentClassic):
         self.logger.info("Finish")
 
 
-    def delete_edge(self,identifier_1,identifier_2):
+    def build_delete_edge(self,identifier_1,identifier_2):
         edge_list = []
         # node_1 = ScKeynodes[f"{identifier_1[0]}"]
         # node_2 = ScKeynodes[f"{identifier_2[0]}"]
@@ -97,10 +101,13 @@ class CheckNodeAgent(ScAgentClassic):
         node_2 = ScKeynodes["note"]
 
         self.logger.info(f"Get node {node_1} and node  {node_2}")
-        
+        # --Создаем дугу
+        edge = create_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM,node_1,node_2)
+        # --Удаляем дугу
+        status_code = delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
         self.logger.info(" ")
         self.logger.info("Deleting ...")
-        status_code = delete_edges(node_1,node_2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        
         
         self.logger.info(f"Delete status code {status_code}")
         self.logger.info("Finish")   
