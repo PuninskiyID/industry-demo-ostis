@@ -40,6 +40,8 @@ class ExampleAgent(ScAgentClassic):
         super().__init__("action_example_action")
 
     def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+        link = create_link(
+            "Working Savushkin example action 2", ScLinkContentType.STRING, link_type=sc_types.LINK_CONST)
         result = self.run(action_element)
         is_successful = result == ScResult.OK
         finish_action_with_status(action_element, is_successful)
@@ -51,7 +53,7 @@ class ExampleAgent(ScAgentClassic):
         self.logger.info("ExampleAgent started")
 
         link = create_link(
-            "smth", ScLinkContentType.STRING, link_type=sc_types.LINK_CONST)
+            "Working Savushkin example action 2", ScLinkContentType.STRING, link_type=sc_types.LINK_CONST)
  
         create_action_answer(action_node, link)
 
