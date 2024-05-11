@@ -51,6 +51,7 @@ class CheckNodeAgent(ScAgentClassic):
         self.logger.info("Check Agent is up" )
         # --- set hardware ---
         self.create_edge_pattern = "Построить дугу из 'identifier' в 'identifier'"
+        self.check_nodes()
         self.call_agent()
         self.build_delete_edge(["some_class_name"],["some_class_name"])
 
