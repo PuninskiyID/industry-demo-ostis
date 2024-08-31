@@ -62,6 +62,7 @@ class VoiseAssistantAgent(ScAgentClassic):
         super().__init__("voice_action")
         self.inp_node_1 = ""
         self.inp_node_2 = ""
+        
     
 
 
@@ -263,6 +264,52 @@ class VoiseAssistantAgent(ScAgentClassic):
      # --- Set of functions for ScAddr interaction
 
 
+    def get_valve_identifiers(self,data,flag):
+        # self.valve_list = ["один","два","три","четыре","пять","шесть","семь","восемь","девять","десять"]
+        self.valve_list = ["1","2","3","4","5","6","7","8","9","10"]
+        data_list = data.split(' ')
+        identifier_1 = []
+    
+        for word in data_list:
+            if word in self.valve_list:
+                word = self.valve_list.index(word)+1
+                identifier_1.append(word)
+
+        if flag == True:
+            self.turn_on_valve(identifier_1)
+        elif flag == False:
+            self.turn_off_valve(identifier_1)    
+
+
+    def turn_on_valve(self,identifier_1):
+        open_valve = ScKeynodes["opened_valves"]
+        close_valve = ScKeynodes["closed_valves"]
+        target_valve = ScKeynodes[f"{identifier_1[0]}"]
+
+        target_edges = get_edges(close_valve,target_valve, sc_types.UNKNOWN)
+        status_code = delete_elements(*target_edges)
+        self.logger.info(f"Delete status code {status_code}")
+
+        edge = create_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM,open_valve,target_valve)
+        self.logger.info(f"Valve {identifier_1[0]} connection addr is {edge}")
+
+        self.logger.info("Finish")   
+
+
+    def turn_off_valve(self,identifier_1):
+        open_valve = ScKeynodes["opened_valves"]
+        close_valve = ScKeynodes["closed_valves"]
+        target_valve = ScKeynodes[f"{identifier_1[0]}"]
+
+        target_edges = get_edges(open_valve ,target_valve, sc_types.UNKNOWN)
+        status_code = delete_elements(*target_edges)
+        self.logger.info(f"Delete status code {status_code}")
+
+        edge = create_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM,close_valve,target_valve)
+        self.logger.info(f"Valve {identifier_1[0]} connection addr is {edge}")
+
+        self.logger.info("Finish")      
+
     def build_edge(self,identifier_1,identifier_2):
         node_1 = ScKeynodes[f"{identifier_1[0]}"]
         node_2 = ScKeynodes[f"{identifier_2[0]}"]
@@ -409,4 +456,8 @@ class VoiseAssistantAgent(ScAgentClassic):
             self.get_node_add_create_identifiers(data)
         elif "удалить вершину" in data:
             self.get_node_delete_identifiers(data)
+        elif "открыть клапан" in data:
+            self.get_valve_identifiers(data,True)
+        elif "закрыть клапан" in data:
+            self.get_valve_identifiers(data,False)
                   
